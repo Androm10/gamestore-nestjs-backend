@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-import { GameWhereFilter } from 'src/common/types/game-types';
 import { IGameRepository } from 'src/core/interfaces/game-repository.interface';
 import { Game } from 'src/sequelize/models';
-import { GameFactoryService } from 'src/common/services/game-factory.service';
+import { PaginationSequelize } from 'src/common/types/pagination-sequelize.type';
+import { paginate } from 'src/common/utils/paginate';
+import { FilterGameQueryDto } from '../dto/filter-game-query.dto';
+import { GameFactoryService } from 'src/common/modules/factories/services/game-factory.service';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class GameRepository implements IGameRepository {
@@ -13,9 +16,56 @@ export class GameRepository implements IGameRepository {
     private gameFactoryService: GameFactoryService,
   ) {}
 
-  async getAll(where?: GameWhereFilter) {
-    const games = await this.gameModel.findAll({ where: { ...where } });
-    return this.gameFactoryService.createNewGames(games);
+  async getAll(pagination: PaginationSequelize, filter?: FilterGameQueryDto) {
+    const query: any = {};
+    if ('authorId' in filter) {
+      query.authorId = filter.authorId;
+    }
+
+    if ('name' in filter) {
+      query.name = {
+        [Op.like]: `%${filter.name}%`,
+      };
+    }
+
+    if ('priceLowerBoundary' in filter || 'priceUpperBoundary' in filter) {
+      query.price = {};
+    }
+
+    if ('priceLowerBoundary' in filter) {
+      query.price[Op.gte] = filter.priceLowerBoundary;
+    }
+
+    if ('priceUpperBoundary' in filter) {
+      query.price[Op.lte] = filter.priceUpperBoundary;
+    }
+
+    if (
+      'releaseDateLowerBoundary' in filter ||
+      'releaseDateUpperBoundary' in filter
+    ) {
+      query.releaseDate = {};
+    }
+
+    if ('releaseDateLowerBoundary' in filter) {
+      query.releaseDate[Op.gte] = filter.releaseDateLowerBoundary;
+    }
+
+    if ('releaseDateUpperBoundary' in filter) {
+      query.releaseDate[Op.lte] = filter.releaseDateUpperBoundary;
+    }
+
+    const games = await this.gameModel.findAndCountAll({
+      where: { ...query },
+      ...pagination,
+    });
+
+    return paginate(
+      pagination.limit,
+      pagination.offset,
+      games.count,
+      this.gameFactoryService.createNewGames(games.rows),
+    );
   }
 
   async get(id: number) {

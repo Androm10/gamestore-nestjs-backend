@@ -3,10 +3,12 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 import { IUserRepository } from 'src/core/interfaces/user-repository.interface';
-import { UserFactoryService } from 'src/common/services/user-factory.service';
 import { Role, User } from 'src/sequelize/models';
 import { RegistrationData } from 'src/common/types/registration-data';
-import { GameFactoryService } from 'src/common/services/game-factory.service';
+import { PaginationSequelize } from 'src/common/types/pagination-sequelize.type';
+import { paginate } from 'src/common/utils/paginate';
+import { GameFactoryService } from 'src/common/modules/factories/services/game-factory.service';
+import { UserFactoryService } from 'src/common/modules/factories/services/user-factory.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -20,15 +22,26 @@ export class UserRepository implements IUserRepository {
     private gameFactoryService: GameFactoryService,
   ) {}
 
-  async getAll() {
-    const users = await this.userModel.findAll();
-    return this.userFactoryService.createNewUsers(users);
+  async getAll(pagination: PaginationSequelize) {
+    const users = await this.userModel.findAndCountAll({ ...pagination });
+
+    return paginate(
+      pagination.limit,
+      pagination.offset,
+      users.count,
+      this.userFactoryService.createNewUsers(users.rows),
+    );
   }
 
-  async getGameCollection(userId: number) {
+  async getGameCollection(pagination: PaginationSequelize, userId: number) {
     const user = await this.userModel.findByPk(userId);
-    const games = await user.$get('games');
-    return this.gameFactoryService.createNewGames(games);
+    const games = await user.$get('games', { ...pagination });
+    return paginate(
+      pagination.limit,
+      pagination.offset,
+      games.length,
+      this.gameFactoryService.createNewGames(games),
+    );
   }
 
   async get(id: number) {
@@ -66,7 +79,6 @@ export class UserRepository implements IUserRepository {
 
     const roles = await user.$get('roles');
 
-    //TODO: move factories to the common directory
     return roles.map((role) => ({
       id: role.id,
       name: role.name,

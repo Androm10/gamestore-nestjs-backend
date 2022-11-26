@@ -1,9 +1,11 @@
-import { ReviewWhereFilter } from 'src/common/types/review-types';
+import { FilterReviewQueryDto } from 'src/modules/review/dto/filter-review-query.dto';
 import { IGenericRepository } from '../abstracts/generic-repository.abstract';
 import { Review } from '../entities/review.entity';
+import { Pagination } from '../types/pagination';
 
-//TODO: get it off
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IReviewRepository extends IGenericRepository<Review> {
-  getAll(where?: ReviewWhereFilter): Promise<Review[]>;
+  getAll(
+    paginationQuery: any,
+    filter?: FilterReviewQueryDto,
+  ): Promise<Pagination<Review>>;
 }

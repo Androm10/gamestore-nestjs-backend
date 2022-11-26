@@ -11,11 +11,15 @@ import { ReviewReactsRepository } from './repositories/review-reacts.repository'
 import { ReviewReactsService } from './services/review-reacts.service';
 import { ReviewService } from './services/review.service';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Review, ReviewFunny, ReviewLike } from 'src/sequelize/models';
+import { Game, Review, ReviewFunny, ReviewLike } from 'src/sequelize/models';
+import { FactoriesModule } from 'src/common/modules/factories/factories.module';
 
 @Module({
   controllers: [ReviewController, ReviewReactsController],
-  imports: [SequelizeModule.forFeature([Review, ReviewLike, ReviewFunny])],
+  imports: [
+    SequelizeModule.forFeature([Review, ReviewLike, ReviewFunny, Game]),
+    FactoriesModule,
+  ],
   providers: [
     ReviewService,
     ReviewReactsService,

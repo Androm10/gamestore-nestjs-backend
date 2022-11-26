@@ -1,4 +1,6 @@
-export const throttler = {
-  limit: 10,
-  ttl: 60,
-};
+export default () => ({
+  throttler: {
+    limit: 10,
+    ttl: 60,
+  },
+});

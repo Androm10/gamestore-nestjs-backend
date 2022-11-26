@@ -7,9 +7,10 @@ import {
 } from '@nestjs/common';
 
 import { GAME_REPOSITORY } from 'src/common/constants/tokens';
-import { GameWhereFilter } from 'src/common/types/game-types';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { IGameRepository } from 'src/core/interfaces/game-repository.interface';
 import { CreateGameDto } from '../dto/create-game.dto';
+import { FilterGameQueryDto } from '../dto/filter-game-query.dto';
 import { UpdateGameDto } from '../dto/update-game.dto';
 
 @Injectable()
@@ -18,8 +19,11 @@ export class GameService {
     @Inject(GAME_REPOSITORY) private gameRepository: IGameRepository,
   ) {}
 
-  async getAll(where?: GameWhereFilter) {
-    const games = await this.gameRepository.getAll(where);
+  async getAll(paginationDto: PaginationQueryDto, filter?: FilterGameQueryDto) {
+    const limit = paginationDto.limit;
+    const offset = paginationDto.page * limit;
+
+    const games = await this.gameRepository.getAll({ limit, offset }, filter);
     return games;
   }
 

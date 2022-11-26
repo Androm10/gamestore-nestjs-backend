@@ -8,12 +8,15 @@ import {
   Body,
   Request,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 import { NoAuth } from 'src/common/decorators/no-auth.decorator';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { UserRequest } from 'src/common/types/user-request';
 import { CreateGameDto } from '../dto/create-game.dto';
+import { FilterGameQueryDto } from '../dto/filter-game-query.dto';
 import { UpdateGameDto } from '../dto/update-game.dto';
 import { GameService } from '../services/game.service';
 
@@ -24,8 +27,11 @@ export class GameController {
 
   @NoAuth()
   @Get('')
-  async getAll() {
-    return this.gameService.getAll();
+  async getAll(
+    @Query() pagination: PaginationQueryDto,
+    @Query() filter: FilterGameQueryDto,
+  ) {
+    return this.gameService.getAll(pagination, filter);
   }
 
   @ApiBearerAuth('access-token')

@@ -6,10 +6,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 
-import { REVIEW_REPOSITORY } from 'src/common/constants/tokens';
-import { ReviewWhereFilter } from 'src/common/types/review-types';
+import {
+  GAME_REPOSITORY,
+  REVIEW_REPOSITORY,
+} from 'src/common/constants/tokens';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { IReviewRepository } from 'src/core/interfaces/review-repository.interface';
 import { CreateReviewDto } from '../dto/create-review.dto';
+import { FilterReviewQueryDto } from '../dto/filter-review-query.dto';
 import { UpdateReviewDto } from '../dto/update-review.dto';
 
 @Injectable()
@@ -18,8 +22,17 @@ export class ReviewService {
     @Inject(REVIEW_REPOSITORY) private reviewRepository: IReviewRepository,
   ) {}
 
-  async getAll(where?: ReviewWhereFilter) {
-    const reviews = await this.reviewRepository.getAll(where);
+  async getAll(
+    paginationDto: PaginationQueryDto,
+    filter?: FilterReviewQueryDto,
+  ) {
+    const limit = paginationDto.limit;
+    const offset = paginationDto.page * limit;
+
+    const reviews = await this.reviewRepository.getAll(
+      { limit, offset },
+      filter,
+    );
     return reviews;
   }
 

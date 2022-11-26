@@ -8,6 +8,7 @@ import {
   Body,
   ParseIntPipe,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -15,8 +16,9 @@ import { ReviewService } from '../services/review.service';
 import { NoAuth } from 'src/common/decorators/no-auth.decorator';
 import { CreateReviewDto } from '../dto/create-review.dto';
 import { UpdateReviewDto } from '../dto/update-review.dto';
-import { ReviewWhereFilter } from 'src/common/types/review-types';
 import { UserRequest } from 'src/common/types/user-request';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FilterReviewQueryDto } from '../dto/filter-review-query.dto';
 
 @ApiTags('review')
 @Controller('review')
@@ -25,26 +27,17 @@ export class ReviewController {
 
   @NoAuth()
   @Get('')
-  async getAll(@Body() reviewWhereFilter: ReviewWhereFilter) {
-    return this.reviewService.getAll(reviewWhereFilter);
+  async getAll(
+    @Query() pagination: PaginationQueryDto,
+    @Query() filter: FilterReviewQueryDto,
+  ) {
+    return this.reviewService.getAll(pagination, filter);
   }
 
   @NoAuth()
   @Get(':id')
   async get(@Param('id', ParseIntPipe) id: number) {
     return this.reviewService.get(id);
-  }
-
-  @NoAuth()
-  @Get('game/:gameId')
-  async getByGameId(@Param('gameId', ParseIntPipe) gameId: number) {
-    return this.reviewService.getAll({ gameId });
-  }
-
-  @NoAuth()
-  @Get('user/:userId')
-  async getByUserId(@Param('userId', ParseIntPipe) userId: number) {
-    return this.reviewService.getAll({ userId });
   }
 
   @ApiBearerAuth('access-token')

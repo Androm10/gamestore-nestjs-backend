@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { Game } from 'src/core/entities/game.entity';
 
-@Injectable({})
+@Injectable()
 export class GameFactoryService {
   createNewGame(obj: any): Game {
     if (!obj) return null;

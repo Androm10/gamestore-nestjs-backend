@@ -9,11 +9,11 @@ import {
   USER_INFO_REPOSITORY,
   USER_REPOSITORY,
 } from 'src/common/constants/tokens';
-import { UserInfoWhereFilter } from 'src/common/types/user-info-types';
-
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { IUserInfoRepository } from 'src/core/interfaces/user-info-repository.interface';
 import { IUserRepository } from 'src/core/interfaces/user-repository.interface';
 import { CreateUserInfoDto } from '../dto/create-user-info.dto';
+import { FilterUserInfoQueryDto } from '../dto/filter-user-info-query.dto';
 import { UpdateUserInfoDto } from '../dto/update-user-info.dto';
 
 @Injectable()
@@ -25,8 +25,17 @@ export class UserInfoService {
     private userRepository: IUserRepository,
   ) {}
 
-  async getAll(where?: UserInfoWhereFilter) {
-    const userInfos = await this.userInfoRepository.getAll(where);
+  async getAll(
+    paginationDto: PaginationQueryDto,
+    filter?: FilterUserInfoQueryDto,
+  ) {
+    const limit = paginationDto.limit;
+    const offset = paginationDto.page * limit;
+
+    const userInfos = await this.userInfoRepository.getAll(
+      { limit, offset },
+      filter,
+    );
     return userInfos;
   }
 

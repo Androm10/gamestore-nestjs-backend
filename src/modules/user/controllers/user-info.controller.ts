@@ -7,16 +7,19 @@ import {
   Delete,
   Body,
   ParseIntPipe,
-  Req,
+  Request,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 import { NoAuth } from 'src/common/decorators/no-auth.decorator';
-import { UserInfoWhereFilter } from 'src/common/types/user-info-types';
 import { UserInfoService } from '../services/user-info.service';
 import { CreateUserInfoDto } from '../dto/create-user-info.dto';
 import { UpdateUserInfoDto } from '../dto/update-user-info.dto';
 import { Roles } from 'src/common/decorators/check-roles.decorator';
+import { UserRequest } from 'src/common/types/user-request';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FilterUserInfoQueryDto } from '../dto/filter-user-info-query.dto';
 
 @ApiTags('user info')
 @Controller('userinfo')
@@ -25,8 +28,11 @@ export class UserInfoController {
 
   @NoAuth()
   @Get('')
-  async getAll(@Body() userInfoWhereFilter: UserInfoWhereFilter) {
-    return this.userInfoService.getAll(userInfoWhereFilter);
+  async getAll(
+    @Query() pagination: PaginationQueryDto,
+    @Query() filter: FilterUserInfoQueryDto,
+  ) {
+    return this.userInfoService.getAll(pagination, filter);
   }
 
   @NoAuth()
@@ -43,8 +49,11 @@ export class UserInfoController {
 
   @ApiBearerAuth('access-token')
   @Put('update-profile')
-  async updateProffile(@Req() req, @Body() updateUserDto: UpdateUserInfoDto) {
-    return this.userInfoService.update(req.user.id, updateUserDto);
+  async updateProffile(
+    @Request() request: UserRequest,
+    @Body() updateUserDto: UpdateUserInfoDto,
+  ) {
+    return this.userInfoService.update(request.user.id, updateUserDto);
   }
 
   @ApiBearerAuth('access-token')

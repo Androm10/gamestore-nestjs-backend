@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { USER_REPOSITORY } from 'src/common/constants/tokens';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 import { IUserRepository } from 'src/core/interfaces/user-repository.interface';
 import { SignupDto } from 'src/modules/auth/dto/signup.dto';
@@ -18,17 +19,26 @@ export class UserService {
     @Inject(USER_REPOSITORY) private userRepository: IUserRepository,
   ) {}
 
-  async getAll() {
-    const users = await this.userRepository.getAll();
+  async getAll(paginationDto: PaginationQueryDto) {
+    const limit = paginationDto.limit;
+    const offset = paginationDto.page * limit;
+
+    const users = await this.userRepository.getAll({ limit, offset });
     return users;
   }
 
-  async getGameCollection(userId: number) {
+  async getGameCollection(paginationDto: PaginationQueryDto, userId: number) {
     const user = await this.userRepository.get(userId);
 
     if (!user) throw new NotFoundException('No such user');
 
-    const games = await this.userRepository.getGameCollection(userId);
+    const limit = paginationDto.limit;
+    const offset = paginationDto.page * limit;
+
+    const games = await this.userRepository.getGameCollection(
+      { limit, offset },
+      userId,
+    );
     return games;
   }
 

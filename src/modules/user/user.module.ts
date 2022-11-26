@@ -14,10 +14,14 @@ import {
 } from 'src/common/constants/tokens';
 
 import { Role, User, UserInfo } from 'src/sequelize/models';
+import { FactoriesModule } from 'src/common/modules/factories/factories.module';
 
 @Module({
   controllers: [UserController, UserInfoController],
-  imports: [SequelizeModule.forFeature([User, UserInfo, Role])],
+  imports: [
+    SequelizeModule.forFeature([User, UserInfo, Role]),
+    FactoriesModule,
+  ],
   providers: [
     UserService,
     UserInfoService,

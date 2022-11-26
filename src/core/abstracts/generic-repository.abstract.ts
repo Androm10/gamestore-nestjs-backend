@@ -1,5 +1,7 @@
+import { Pagination } from '../types/pagination';
+
 export abstract class IGenericRepository<T> {
-  abstract getAll(): Promise<T[]>;
+  abstract getAll(paginationQuery: any): Promise<Pagination<T>>;
 
   abstract get(id: number): Promise<T>;
 
